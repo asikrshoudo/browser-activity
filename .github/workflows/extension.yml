@@ -31,3 +31,4 @@ jobs:
         with:
           name: extension
           path: .output/*.zip
+          include-hidden-files: true
