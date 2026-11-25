@@ -5,6 +5,6 @@ export default defineConfig({
   manifest: {
     name: 'Browser Activity',
     description: 'Discord Rich Presence for your browser activity',
-    permissions: ['nativeMessaging'],
+    permissions: ['nativeMessaging', 'tabs'],
   },
 });
