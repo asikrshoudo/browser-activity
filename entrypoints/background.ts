@@ -1,11 +1,11 @@
-import { buildActivity } from '@/utils/activity';
+import { buildActivity, type YouTubeMedia } from '@/utils/activity';
 import { detectBrowser } from '@/utils/browser';
 
 const HOST = 'com.asikrshoudo.browser_activity';
 
 export default defineBackground(() => {
   const info = detectBrowser();
-  const channels = new Map<number, string>();
+  const media = new Map<number, YouTubeMedia>();
   let port: ReturnType<typeof browser.runtime.connectNative> | null = null;
   let last = '';
 
@@ -33,8 +33,8 @@ export default defineBackground(() => {
 
   async function update() {
     const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
-    const channel = tab?.id === undefined ? undefined : channels.get(tab.id);
-    const activity = tab?.url ? buildActivity(tab.url, info, channel) : null;
+    const current = tab?.id === undefined ? undefined : media.get(tab.id);
+    const activity = tab?.url ? buildActivity(tab.url, info, current) : null;
     send(activity ? { type: 'activity', activity } : { type: 'clear' });
   }
 
@@ -42,12 +42,12 @@ export default defineBackground(() => {
   browser.tabs.onUpdated.addListener((_id, change) => {
     if (change.url || change.status === 'complete') update();
   });
-  browser.tabs.onRemoved.addListener((id) => channels.delete(id));
+  browser.tabs.onRemoved.addListener((id) => media.delete(id));
   browser.windows.onFocusChanged.addListener(update);
 
   browser.runtime.onMessage.addListener((message, sender) => {
-    if (message?.type === 'channel' && sender.tab?.id !== undefined) {
-      channels.set(sender.tab.id, message.channel);
+    if (message?.type === 'media' && sender.tab?.id !== undefined) {
+      media.set(sender.tab.id, message.media);
       update();
     }
   });
