@@ -1,10 +1,10 @@
 import { buildActivity, type YouTubeMedia } from '@/utils/activity';
-import { detectBrowser } from '@/utils/browser';
+import { detectBrowser, detectBrowserExact } from '@/utils/browser';
 
 const HOST = 'com.asikrshoudo.browser_activity';
 
 export default defineBackground(() => {
-  const info = detectBrowser();
+  let info = detectBrowser();
   const media = new Map<number, YouTubeMedia>();
   let port: ReturnType<typeof browser.runtime.connectNative> | null = null;
   let last = '';
@@ -52,5 +52,8 @@ export default defineBackground(() => {
     }
   });
 
-  update();
+  detectBrowserExact().then((exact) => {
+    info = exact;
+    update();
+  });
 });
